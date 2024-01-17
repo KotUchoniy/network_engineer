@@ -13,6 +13,9 @@
 | PC-B       | NIC       | 192.168.1.2  | 255.255.255.0 |
 
 ## Часть 1. Создание и настройка сети.
- <details><summary><a href="https://Example.com">Hi</a></summary>
-    hi
+  <details><summary>Шаг 1. Подключить сеть в соответствии с топологией</summary>
+      
+ ![Pic_2.png](./Pic_2.png)
+ 
  </details>
+ 
