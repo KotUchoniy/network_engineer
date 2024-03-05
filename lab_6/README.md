@@ -54,7 +54,8 @@ R1# copy running-config startup-config
 R1# clock set 15:36:00 4 march 2024
 ```
 ### Настройка базовых параметров каждого коммутатора.
-Настройка коммутатора S1.
+<details><summary>Настройка коммутатора S1.</summary>
+    
 ```
 Switch> enable
 Switch# conf t
@@ -78,7 +79,10 @@ S1(config)# exit
 S1# clock set 15:48:00 4 march 2024
 S1# copy running-config startup-config
 ```
-Настройка коммутатора S2.
+</details>
+
+<details><summary>Настройка коммутатора S2.</summary>
+    
 ```
 Switch> enable
 Switch# conf t
@@ -102,9 +106,12 @@ S2(config)# exit
 S2# clock set 15:55:00 4 march 2024
 S2# copy running-config startup-config
 ```
+</details>
+
 ## Часть 2. Создание сетей VLAN и назначение портов коммутатора.
 ### Создание сети VLAN на коммутаторах и назначение VLAN.
-Настройка коммутатора S1.
+<details><summary>Настройка коммутатора S1.</summary>
+    
 ```
 S1(config)# vlan 10
 S1(config-vlan)# name MGMT
@@ -128,10 +135,13 @@ S1(config)# interface fa0/6
 S1(config-if)# switchport access vlan 20
 S1(config-if)# exit
 ```
+</details>
+
 
 ![Pic_2.png](./Pic_2.png)
 
-Настройка коммутатора S2.
+<details><summary>Настройка коммутатора S2.</summary>
+    
 ```
 S2(config)# vlan 10
 S2(config-vlan)# name MGMT
@@ -155,6 +165,8 @@ S2(config)# interface fa0/18
 S2(config-if)# switchport access vlan 30
 S2(config-if)# exit
 ```
+</details>
+
 ![Pic_3.png](./Pic_3.png)
 
 ## Часть 3. Конфигурация магистрального канала стандарта 802.1Q  между коммутаторами.
