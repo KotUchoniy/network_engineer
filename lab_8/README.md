@@ -374,3 +374,85 @@ R1# copy ru st
 ![](Pic_8.png)
 
 ## Настройка и проверка DHCP-ретрансляции на R2.
+
+Настройка R2 в качестве агента DHCP-ретрансляции:
+```
+R2(config)#int g0/0/1 
+R2(config-if)#ip helper-address 10.0.0.1
+R2(config-if)#end 
+R2#wr
+```
+
+Проверка получения ip-адреса компьютером PC-B:
+
+![](Pic_9.png)
+
+Проверка доступности интерфейса G0/0/1 маршрутизатора R1 с помощью эхо-запросов:
+
+![](Pic_10.png)
+
+Проверка арендованных адресов на R1:
+
+![](Pic_11.png)
+
+Команда "show ip dhcp server statistics" в CPT недоступна.
+
+# Настройка DHCPv6
+## Топология
+
+![](Pic_12.png)
+
+## Таблица адресации.
+<table>
+    <thead>
+        <tr>
+            <th>Устройство</th>
+            <th>Интерфейс</th>
+            <th>IPv6-адрес</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=4 align="center">R1</td>
+            <td rowspan=2 align="center">G0/0/0</td>
+            <td align="center">2001:db8:acad:2::1/64</td>
+        </tr>
+        <tr>
+            <td align="center">fe80::1</td>
+        </tr>
+        <tr>
+            <td rowspan=2 align="center">G0/0/1</td>
+            <td align="center">2001:db8:acad:1::1/64</td>
+        </tr>
+        <tr>
+            <td align="center">fe80::1</td>
+        </tr>
+        <tr>
+            <td rowspan=4 align="center">R2</td>
+            <td rowspan=2 align="center">G0/0/0</td>
+            <td align="center">2001:db8:acad:2::2/64</td>
+        </tr>
+        <tr>
+            <td align="center">fe80::2</td>
+        </tr>
+        <tr>
+            <td rowspan=2 align="center">G0/0/1</td>
+            <td align="center">2001:db8:acad:3::1/64</td>
+        </tr>
+        <tr>
+            <td align="center">fe80::1</td>
+        </tr>
+        <tr>
+            <td align="center">PC-A</td>
+            <td align="center">NIC</td>
+            <td align="center">DHCP</td>
+        </tr>
+        <tr>
+            <td align="center">PC-B</td>
+            <td align="center">NIC</td>
+            <td align="center">DHCP</td>
+        </tr>
+    </tbody>
+</table>
+
+## Создание сети и настройка основных параметров устройства.
