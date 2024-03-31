@@ -456,3 +456,216 @@ R2#wr
 </table>
 
 ## Создание сети и настройка основных параметров устройства.
+
+### Базовая настройка маршрутизаторов.
+
+<details><summary>Настроен маршрутизатор R1.</summary>
+
+```
+Router> enable
+Router# conf t
+Router(config)# no ip domain-lookup
+Router(config)# hostname R1
+R1(config)# service password-encryption
+R1(config)# enable secret class
+R1(config)# line console 0
+R1(config-line)# logging synchronous
+R1(config-line)# password cisco
+R1(config-line)# login
+R1(config-line)# exit
+R1(config)# line vty 0 4
+R1(config-line)# logging synchronous
+R1(config-line)# password cisco
+R1(config-line)# login
+R1(config-line)# exit
+R1(config)# banner motd "Please login"
+R1(config)# ipv6 unicast-routing 
+R1(config)# exit
+R1# wr
+
+```
+</details>
+
+<details><summary>Настроен маршрутизатор R2.</summary>
+
+```
+Router> enable
+Router# conf t
+Router(config)# no ip domain-lookup
+Router(config)# hostname R2
+R2(config)# service password-encryption
+R2(config)# enable secret class
+R2(config)# line console 0
+R2(config-line)# logging synchronous
+R2(config-line)# password cisco
+R2(config-line)# login
+R2(config-line)# exit
+R2(config)# line vty 0 4
+R2(config-line)# logging synchronous
+R2(config-line)# password cisco
+R2(config-line)# login
+R2(config-line)# exit
+R2(config)# banner motd "Please login"
+R1(config)# ipv6 unicast-routing 
+R2(config)# exit
+R2# wr
+```
+</details>
+
+### Базовая настройка коммутаторов.
+
+<details><summary>Настройка коммутатора S1.</summary>
+    
+```
+Switch> enable
+Switch# conf t
+Switch(config)# no ip domain-lookup
+Switch(config)# hostname S1
+S1(config)# service password-encryption
+S1(config)# enable secret class
+S1(config)# line console 0
+S1(config-line)# logging synchronous
+S1(config-line)# password cisco
+S1(config-line)# login
+S1(config-line)# exit
+S1(config)# line vty 0 4
+S1(config-line)# logging synchronous
+S1(config-line)# password cisco
+S1(config-line)# login
+S1(config-line)# exit
+S1(config)# banner motd "Please login"
+S1(config)# int ran f0/1-4, f0/7-24, g0/1-2
+S1(config-if)# shutdown
+S1(config)# exit
+S1# wr
+```
+</details>
+
+<details><summary>Настройка коммутатора S2.</summary>
+    
+```
+Switch> enable
+Switch# conf t
+Switch(config)# no ip domain-lookup
+Switch(config)# hostname S2
+S2(config)# service password-encryption
+S2(config)# enable secret class
+S2(config)# line console 0
+S2(config-line)# logging synchronous
+S2(config-line)# password cisco
+S2(config-line)# login
+S2(config-line)# exit
+S2(config)# line vty 0 4
+S2(config-line)# logging synchronous
+S2(config-line)# password cisco
+S2(config-line)# login
+S2(config-line)# exit
+S2(config)# banner motd "Please login"
+S1(config)# int ran f0/1-4, f0/6-17, f0/19-24 g0/1-2
+S1(config-if)# shutdown
+S2(config)# exit
+S2# wr
+```
+</details>
+
+### Настройка интерфейсов и маршрутизации для обоих маршрутизаторов.
+
+Настройка интерфейсов маршрутизатора R1:
+```
+R1(config)#int g0/0/0
+R1(config-if)#ipv6 address 2001:db8:acad:2::1/64
+R1(config-if)#ipv6 address fe80::1 link-local 
+R1(config-if)#no shut
+R1(config-if)#exit
+R1(config)#int g0/0/1
+R1(config-if)#ipv6 addr 2001:db8:acad:1::1/64
+R1(config-if)#ipv6 addr fe80::1 link-local
+R1(config-if)#no shut
+R1(config-if)#exit
+```
+Настройка интерфейсов маршрутизатора R2:
+```
+R2(config)#int g0/0/0
+R2(config-if)#ipv6 address 2001:db8:acad:2::2/64
+R2(config-if)#ipv6 address fe80::2 link-local 
+R2(config-if)#no shut
+R2(config-if)#exit
+R2(config)#int g0/0/1
+R2(config-if)#ipv6 addr 2001:db8:acad:3::1/64
+R2(config-if)#ipv6 addr fe80::1 link-local
+R2(config-if)#no shut
+R2(config-if)#exit
+```
+Настройка маршрута по умолчанию:
+```
+R1(config)#ipv6 route ::/0 2001:db8:acad:2::2
+R2(config)#ipv6 route ::/0 2001:db8:acad:2::1
+```
+Проверка работы:
+
+![](Pic_13.png)
+
+## Проверка назначения адреса SLAAC от R1.
+
+![](Pic_14.png)
+
+Как видно на рисунке, адрес SLAAC назначен.
+
+## Настройка и проверка сервера DHCP на R1.
+
+Создан пул DHCP IPv6 с именем R1-STATELESS. В составе этого пула назначен адрес DNS-сервера как 2001:db8:acad::254, имя домена - stateless.com
+```
+R1(config)#ipv6 dhcp pool R1-STATELESS
+R1(config-dhcpv6)#dns-server 2001:db8:acad::254
+R1(config-dhcpv6)#domain-name STATELESS.com
+```
+Настроен интерфейс G0/0/1 на R1, чтобы предоставить флаг конфигурации OTHER для локальной сети R1 указан только что созданный пул DHCP в качестве ресурса DHCP для этого интерфейса.
+```
+R1(config-dhcpv6)#interface g0/0/1
+R1(config-if)#ipv6 nd other-config-flag
+R1(config-if)#ipv6 dhcp server R1-STATELESS
+R1(config-if)#do wr
+```
+Проверка получения адреса компьютером PC-A:
+![](Pic_15.png)
+
+Проверка подключения с помощью эхо-запроса к интерфейсу G0/0/1 R2.
+
+![](Pic_16.png)
+
+## Настройка сервера DHCPv6 с сохранением состояния на R1.
+
+Создание пула DHCPv6 на R1 для сети 2001:db8:acad:3:aaa::/80. Это предоставит адреса локальной сети, подключенной к интерфейсу G0/0/1 на R2.
+```
+R1(config)#ipv6 dhcp pool R2-STATEFUL
+R1(config-dhcpv6)#address prefix 2001:db8:acad:3:aaa::/80
+R1(config-dhcpv6)#dns-server 2001:db8:acad::254
+R1(config-dhcpv6)#domain-name STATEFUL.com
+```
+Назначен только что созданный пул DHCPv6 интерфейсу g0/0/0 на R1.
+```
+R1(config-dhcpv6)#int g0/0/0
+R1(config-if)#ipv6 dhcp
+R1(config-if)#ipv6 dhcp s
+R1(config-if)#ipv6 dhcp server R2-STATEFUL
+```
+
+## Настройка и проверка ретрансляции DHCPv6 на R2.
+
+### Проверка адреса PC-B.
+
+![](Pic_17.png)
+
+### Настройка R2 в качестве агента DHCP-ретрансляции для локальной сети на G0/0/1.
+
+```
+R2(config)#int g0/0/1
+R2(config-if)#ipv6 nd managed-config-flag 
+R2(config-if)#ipv6 dhcp relay destination 2001:db8:acad:2::1 g0/0/0  //команда не поддерживается в CPT.
+R2(config-if)# end
+R2#wr
+```
+
+### Попытка получить адрес IPv6 из DHCPv6 на PC-B.
+
+Так как в CPT отсутствует команда создающая ретрансяцию для IPv6, не 
