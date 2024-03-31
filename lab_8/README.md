@@ -18,32 +18,36 @@
 | PC-A       | NIC         | DHCP         | DHCP            | DHCP              |
 | PC-B       | NIC         | DHCP         | DHCP            | DHCP              |
 
-    <table>
-      <thead>
+__
+
+<table>
+    <thead>
         <tr>
-          <th colspan="2">1</th>
-          <th>3</th>
-          <th>4</th>
-          <th>5</th>
+            <th>Устройство</th>
+            <th>Интерфейс</th>
+            <th>IP-адрес</th>
+            <th>Маска подсети</th>
+            <th>Шлюз по умолчанию</th>
         </tr>
-      </thead>
-      <tbody>
+    </thead>
+    <tbody>
         <tr>
-          <td rowspan="3">1</td>
-          <td rowspan="2">1</td>
-          <td rowspan="2" colspan="2">2</td>
-          <td>6</td>
-        </tr>
-        <tr>
-          <td>7</td>
+            <td rowspan=4 align="center">R1 Text</td>
+            <td rowspan=2 align="center">R2 Text A</td>
+            <td align="center">R3 Text A</td>
         </tr>
         <tr>
-          <td>4</td>
-          <td>3</td>
-          <td colspan="2">5</td>
+            <td align="center">R3 Text B</td>
         </tr>
-      </tbody>
-    </table>
+        <tr>
+            <td rowspan=2 align="center">R2 Text B</td>
+            <td align="center">R3 Text C</td>
+        </tr>
+        <tr>
+            <td align="center">R3 Text D</td>
+        </tr>
+    </tbody>
+</table>
 
 ## Таблица VLAN.
 | VLAN | Имя         | Назначенный адрес           |
