@@ -435,6 +435,7 @@ FastEthernet0/1            yes        unlimited
 FastEthernet0/18           no         5     
 ```
 Проверка получения ip-адреса компьютером PC-B.
+
 ![](Pic_3.png)
 
 Проверка привязки отслеживания DHCP:
@@ -471,6 +472,7 @@ S2(config-if)#spanning-tree bpduguard enable
 ```
 
 Проверка наличия сквозного ⁪подключения с PC-B.
+
 ![](Pic_4.png)
 
 ## Вопросы для повторения
