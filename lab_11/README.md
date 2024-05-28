@@ -406,8 +406,12 @@ R1(config)# ip http authentication local
 
 ```
 R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 22
-R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 172.16.1.2 0.0.0.0 eq 80
-R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 172.16.1.2 0.0.0.0 eq 443
+R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.20.0.1 0.0.0.255 eq 80
+R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.20.0.1 0.0.0.255 eq 443
+R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.30.0.1 0.0.0.0 eq 80
+R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.30.0.1 0.0.0.0 eq 443
+R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.40.0.1 0.0.0.0 eq 80
+R1(config)#access-list 101 deny tcp 10.40.0.0 0.0.0.255 10.40.0.1 0.0.0.0 eq 443
 R1(config)#access-list 101 deny icmp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 echo
 R1(config)#access-list 101 deny icmp 10.40.0.0 0.0.0.255 10.30.0.0 0.0.0.255 echo
 R1(config)#access-list 101 permit ip any any
