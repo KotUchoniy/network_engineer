@@ -1,0 +1,300 @@
+# Настройка протоколов CDP, LLDP и NTP
+## Топология
+
+![](Pic_1.png)
+
+## Таблица адресации
+<table>
+    <thead>
+        <tr>
+            <th>Устройство</th>
+            <th>Интерфейс/VLAN</th>
+            <th>IP-адрес</th>
+            <th>Маска подсети</th>
+            <th>Шлюз по умолчанию</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=2 align="center">R1</td>
+            <td align="center">Loopback 1</td>
+            <td align="center">172.16.1.1</td>
+            <td align="center">255.255.255.0</td>
+            <td rowspan=2 align="center">-</td>
+        </tr>
+        <tr>
+            <td align="center">G0/0/1</td>
+            <td align="center">10.22.0.1</td>
+            <td align="center">255.255.255.0</td>
+        </tr>
+        <tr>
+            <td align="center">S1</td>
+            <td align="center">SVI VLAN 1</td>
+            <td align="center">10.22.0.2</td>
+            <td align="center">255.255.255.0</td>
+            <td align="center">10.22.0.1</td>
+        </tr>
+        <tr>
+            <td align="center">S2</td>
+            <td align="center">SVI VLAN 1</td>
+            <td align="center">10.22.0.3</td>
+            <td align="center">255.255.255.0</td>
+            <td align="center">10.22.0.1</td>
+        </tr>
+
+    </tbody>
+</table>
+
+## Часть 1. Создание сети и настройка основных параметров устройства.
+
+Настройка R1:
+```
+enable
+configure terminal
+hostname R1
+no ip domain lookup
+service password-encryption
+enable secret class
+line console 0
+logging synchronous
+password cisco
+login
+exit
+line vty 0 4
+logging synchronous
+password cisco
+login
+exit
+banner motd "Please login"
+int Loopback 1
+ip address 172.16.1.1 255.255.255.0
+no shut
+int g0/0/1
+ip address 10.22.0.1 255.255.255.0
+no shut
+end
+wr
+```
+
+Настройка S1:
+```
+enable
+configure terminal
+hostname S1
+no ip domain lookup
+service password-encryption
+enable secret class
+line console 0
+logging synchronous
+password cisco
+login
+exit
+line vty 0 4
+logging synchronous
+password cisco
+login
+exit
+banner motd "Please login"
+ip default-gateway 10.22.0.1
+int vlan 1
+ip address 10.22.0.2 255.255.255.0
+no shut
+end
+wr
+```
+
+Настройка S2:
+```
+enable
+configure terminal
+hostname S2
+no ip domain lookup
+service password-encryption
+enable secret class
+line console 0
+logging synchronous
+password cisco
+login
+exit
+line vty 0 4
+logging synchronous
+password cisco
+login
+exit
+banner motd "Please login"
+ip default-gateway 10.22.0.1
+int vlan 1
+ip address 10.22.0.3 255.255.255.0
+no shut
+end
+wr
+```
+
+## Часть 2. Обнаружение сетевых ресурсов с помощью протокола CDP.
+
+Определим, какие из интерфейсов используются в работе CDP.
+
+```
+R1#show cdp interface 
+Vlan1 is administratively down, line protocol is down
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+GigabitEthernet0/0/0 is administratively down, line protocol is down
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+GigabitEthernet0/0/1 is up, line protocol is up
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+GigabitEthernet0/0/2 is administratively down, line protocol is down
+  Sending CDP packets every 60 seconds
+  Holdtime is 180 seconds
+```
+
+В CDP участвуют 4 интерфейса, но активен только один.
+
+С помощью команды show cdp определим версию IOS на S1.
+
+```
+R1#show cdp entry  S1
+
+Device ID: S1
+Platform: cisco 2960, Capabilities: Switch
+Interface: GigabitEthernet0/0/1, Port ID (outgoing port): FastEthernet0/5
+Holdtime: 130
+
+Version :
+Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE4, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2013 by Cisco Systems, Inc.
+Compiled Wed 26-Jun-13 02:49 by mnguyen
+
+advertisement version: 2
+Duplex: full
+```
+
+Используется версия 15.0(2)SE4.
+
+На S1 с помощью команды show cdp traffic определим переданное число пакетов CDP. (Не поддерживается в Packet Tracer).
+
+После настройки SVI, в выводе команды show cdp появляется IP-адрес интерфейса управления коммутатора.
+```
+R1#show cdp entry  S1
+
+Device ID: S1
+Entry address(es): 
+  IP address : 10.22.0.2
+Platform: cisco 2960, Capabilities: Switch
+Interface: GigabitEthernet0/0/1, Port ID (outgoing port): FastEthernet0/5
+Holdtime: 130
+
+Version :
+Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE4, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2013 by Cisco Systems, Inc.
+Compiled Wed 26-Jun-13 02:49 by mnguyen
+
+advertisement version: 2
+Duplex: full
+```
+
+Отключим CDP на всех устройствах.
+
+```
+R1(config)# no cdp run
+S1(config)# no cdp run
+S2(config)# no cdp run
+```
+
+## Часть 3. Обнаружение сетевых ресурсов с помощью протокола LLDP.
+
+Включим LLDP.
+
+```
+R1(config)# lldp run
+S1(config)# lldp run
+S2(config)# lldp run
+```
+
+На S1 получим информацию о S2 с помощью команды show lldp entry S2 (Не поддерживается в Packet Tracer).
+
+Определим соседей каждого из устройств.
+
+```
+R1#show lldp neighbors 
+Capability codes:
+    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+Device ID           Local Intf     Hold-time  Capability      Port ID
+S1                  Gig0/0/1       120        B               Fa0/5
+
+Total entries displayed: 1
+```
+
+```
+S1#show lldp neighbors 
+Capability codes:
+    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+Device ID           Local Intf     Hold-time  Capability      Port ID
+S2                  Fa0/1          120        B               Fa0/1
+R1                  Fa0/5          120        R               Gig0/0/1
+
+Total entries displayed: 2
+```
+
+```
+S2#show lldp neighbors 
+Capability codes:
+    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+Device ID           Local Intf     Hold-time  Capability      Port ID
+S1                  Fa0/1          120        B               Fa0/1
+
+Total entries displayed: 1
+```
+
+## Часть 4. Настройка NTP.
+
+Получим текущего времени на R1 с помощью команды show clock.
+
+|Дата|Время|Часовой пояс|Источник времени|
+|:-|:-:|-:|-:|
+|1 марта 1993|0:55:29|UTC|Нет|
+
+Установим время на маршрутизаторе R1.
+
+```
+R1#clock set 19:54:00 11 June 2024
+```
+
+Настроим R1 в качестве NTP сервера.
+
+```
+R1(config)# ntp master 4
+```
+
+|Устройство|Дата|Время|Часовой пояс|Источник времени|
+|:-|:-|:-:|-:|-:|
+|S1|1 марта 1993|1:21:19|UTC|Нет|
+|S2|1 марта 1993|1:12:24|UTC|Нет|
+
+Настройка S1 и S2 на получение времени с R1.
+
+```
+S1(config)#ntp server 10.22.0.1
+S2(config)#ntp server 10.22.0.1
+```
+
+Проверка настройки NTP.
+
+```
+S1>show clock detail 
+20:20:1.56 UTC Tue Jun 11 2024
+Time source is NTP
+
+```
+
+## Вопрос для повторения.
+Для каких интерфейсов в пределах сети не следует использовать протоколы обнаружения сетевых ресурсов? Поясните ответ.
+
+Протоколы обнаружения сетевых ресурсов не следует использовать на интерфейсах, подключенных к внешним сетям. Причина в том, что с помощь этих протоколов злоумышленник может получить информацию о сети.
